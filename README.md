@@ -32,11 +32,7 @@ So you can catch thease kind of errors in your editor before running the pipelin
 ## Installation
 ```
 {
-  'atm1020/azure-pipelines.nvim',
-   dependencies = {
-    'MunifTanjim/nui.nvim',
-    'nvim-lua/plenary.nvim'
-  }
+  'atm1020/azure-pipelines.nvim'
 }
 ```
 ## Setup
