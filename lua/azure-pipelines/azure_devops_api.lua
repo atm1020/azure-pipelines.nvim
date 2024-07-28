@@ -1,26 +1,44 @@
 local curl = require('plenary.curl')
-
--- TODO user config
-local organization = os.getenv('AZURE_DEVOPS_ORG')
-local project = os.getenv('AZURE_DEVOPS_PROJECT')
-local token = os.getenv('AZURE_DEVOPS_TOKEN')
+local config = require('azure-pipelines.config_handler')
 
 local API = {
-	base_url = string.format(
-		'https://dev.azure.com/%s/%s/_apis',
-		organization,
-		project
-	),
-	headers = {
-		Authorization = 'Basic ' .. token,
-	},
 	api_version = '7.1',
 }
 
+function API.init(api_config)
+	if not api_config then
+		return
+	end
+	vim.notify('Initializing API', vim.log.levels.INFO, {})
+	API.base_url = string.format(
+		'https://dev.azure.com/%s/%s/_apis',
+		api_config.org_name,
+		api_config.project_name
+	)
+
+	API.headers = {
+		Authorization = 'Basic ' .. api_config.api_token,
+	}
+end
+
+local function check_config_is_set()
+	if not API.base_url then
+		error(
+			"API initialization failed.\
+			Please set up the API configuration for the project (require('azure-pipelines').select_api_config())"
+		)
+	end
+end
+
 --- @return BaseResponse
-local function get_base_resposne(response)
+--- @param response table
+--- @param skip_status_codes table<number,boolean>|nil
+local function get_base_resposne(response, skip_status_codes)
 	local status_code = response.status
-	if status_code >= 400 then
+	if
+		status_code >= 400
+		and (not skip_status_codes or not skip_status_codes[status_code])
+	then
 		error('Failed to fetch data: ' .. vim.inspect({
 			status = status_code,
 			body = response.body,
@@ -52,6 +70,7 @@ end
 --- @param url string
 --- @param query table|nil
 local function get(url, query)
+	check_config_is_set()
 	local response = curl.get(url, {
 		headers = {
 			Authorization = API.headers.Authorization,
@@ -65,7 +84,9 @@ end
 --- @param url string
 --- @param body table
 --- @param query table|nil
-local function post(url, body, query)
+--- @param skip_status_codes table<number,boolean>|nil
+local function post(url, body, query, skip_status_codes)
+	check_config_is_set()
 	local encoded_body = vim.json.encode(body)
 	local response = curl.post(url, {
 		headers = {
@@ -75,17 +96,8 @@ local function post(url, body, query)
 		body = encoded_body,
 		query = set_up_query_param(query),
 	})
-	return get_base_resposne(response)
+	return get_base_resposne(response, skip_status_codes)
 end
-
--- local function get_cont_token(headers)
--- 	for _, v in ipairs(headers) do
--- 		if vim.startswith(v, "x-ms-continuationtoken") then
--- 			return vim.split(v, ": ")[2]
--- 		end
--- 	end
--- 	return nil
--- end
 
 --- @return Pipeline
 function API.get_pipeline(pipeline_id)
@@ -145,13 +157,31 @@ function API.preview(pipeline_id, branch_name, yamlOverride)
 		preview_run_body['yamlOverride'] = yamlOverride
 	end
 
-	return post(url, preview_run_body)
+	return post(url, preview_run_body, nil, { [400] = true })
 end
+
+function API.refresh_config()
+	API.init(config.get_project_api_config())
+end
+
+--- @return GitRepository
+function API.get_repository(repository_id)
+	local url =
+		string.format('%s/git/repositories/%s', API.base_url, repository_id)
+	return get(url).body
+end
+
+API.refresh_config()
 
 return API
 
 --- @class RepositoryConnection
 --- @field id string
+
+--- @class GitRepository
+--- @field id string
+--- @field name string
+--- @field defaultBranch string
 
 --- @class Repository
 --- @field id string
@@ -169,11 +199,10 @@ return API
 --- @field url string
 --- @field folder string
 --- @field configuration PipelineConfiguration
---- @field _links table
 
 --- @class BaseResponse
 --- @field status number
---- @field body table
+--- @field body table|string
 --- @field headers table
 
 --- @class BaseListResponse
@@ -185,6 +214,5 @@ return API
 --- @field uniqueName string
 
 --- @class Branch
---- @field creator table
 --- @field name string
 --- @field objectId string

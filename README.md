@@ -2,11 +2,6 @@
 
 Azure Pipelines integration for Neovim
 
-## TODO
-- [ ] Save the selected pipeline, branch, and mode for each project
-- [ ] Store organization, project, and token information in a config file
-- [ ] Api error handling
-
 ## Motivation
 
 When working with Azure Pipelines, there are scenarios where the LSP server not able to provide validation. 
@@ -40,16 +35,17 @@ So you can catch thease kind of errors in your editor before running the pipelin
 require('azure-pipelines').setup()
 ```
 
-### Setup azure-devop api
+## Usage
 
-Add env vars for azure-devops api
-```shell
-export AZURE_DEVOPS_ORG=<org>
-export AZURE_DEVOPS_PROJECT=<project>
-export AZURE_DEVOPS_TOKEN=<token>
+### Setup azure-devop api
+select/save/delete the Azure DevOps API configuration.
+```lua
+require('azure-pipelines').select_api_config()
 ```
 
-## Usage
+The api configuration is saved globally and can be connect to multiple projects.
+The configuration  which is marked as `active` will be used for the current project.
+
 
 ### Select pipeline
 Select a pipeline from your Azure DevOps project.
@@ -76,6 +72,12 @@ Modes:
 lua require("azure-pipelines").select_mode()
 ```
 
+### Show project settings
+Show the current project settings, which includes the selected pipeline, branch, and dev mode.
+
+```lua
+lua require("azure-pipelines").show_project_settings()
+```
 
 ### Validate pipeline
 Validate the selected pipeline.

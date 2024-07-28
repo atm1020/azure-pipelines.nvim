@@ -9,3 +9,4 @@ lint:
 
 format:
 	stylua ${SRC_DIR} --config-path=.stylua.toml
+
