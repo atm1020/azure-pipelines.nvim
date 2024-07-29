@@ -1,5 +1,7 @@
 local M = {}
 
+M.config = {}
+
 local global_config = {
 	schema = 'https://raw.githubusercontent.com/microsoft/azure-pipelines-vscode/main/service-schema.json',
 	filter = {
@@ -13,9 +15,8 @@ local global_config = {
 	log_level = vim.log.levels.INFO,
 }
 
---- @param custom_config UserConfig
+--- @param custom_config UserConfig|nil
 function M.setup(custom_config)
-	-- TODO put this in a separate module
 	local packages = {
 		{
 			name = 'yaml-language-server',
@@ -43,6 +44,9 @@ function M.setup(custom_config)
 
 	local config =
 		vim.tbl_deep_extend('force', global_config, custom_config or {})
+	vim.g.azure_pipeline = {
+		log_level = config.log_level,
+	}
 	local lspconfig = require('lspconfig')
 	lspconfig.azure_pipelines_ls.setup({
 		root_dir = lspconfig.util.root_pattern(config.root_pattern),

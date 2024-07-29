@@ -117,8 +117,6 @@ local function select_api_config()
 		table.insert(items, key)
 	end
 
-	vim.notify(vim.inspect(items), vim.log.levels.INFO, {})
-
 	local on_select = function(selected_key)
 		if ui.is_contains_active_postfix(selected_key) then
 			selected_key = ui.clear_postfix(selected_key)

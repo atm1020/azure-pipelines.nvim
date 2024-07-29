@@ -21,7 +21,7 @@ local default_config = {
 	use_file = true,
 
 	-- Any messages above this level will be logged.
-	level = vim.g.az_log_level or 'info',
+	-- level = "info",
 
 	-- Level configuration
 	modes = {
@@ -44,7 +44,6 @@ local unpack = unpack or table.unpack
 
 log.new = function(config, standalone)
 	config = vim.tbl_deep_extend('force', default_config, config)
-
 	local outfile = string.format(
 		'%s/%s.log',
 		vim.api.nvim_call_function('stdpath', { 'data' }),
@@ -90,7 +89,10 @@ log.new = function(config, standalone)
 
 	local log_at_level = function(level, level_config, message_maker, ...)
 		-- Return early if we're below the config.level
-		if level < levels[config.level] then
+		if
+			not vim.g.azure_pipeline
+			or level < levels[vim.g.azure_pipeline.log_level]
+		then
 			return
 		end
 		local nameupper = level_config.name:upper()
