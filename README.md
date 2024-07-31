@@ -40,7 +40,7 @@ require('azure-pipelines').setup()
 ### Setup azure-devop api
 select/save/delete the Azure DevOps API configuration.
 ```lua
-require('azure-pipelines').select_api_config()
+lua require('azure-pipelines').select_api_config()
 ```
 
 The api configuration is saved globally and can be connect to multiple projects.
