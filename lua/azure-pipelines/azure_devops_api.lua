@@ -1,5 +1,6 @@
 local curl = require('plenary.curl')
 local config = require('azure-pipelines.config_handler')
+local logger = require('azure-pipelines.utils.logger')
 
 local API = {
 	api_version = '7.1',
@@ -71,12 +72,22 @@ end
 --- @param query table|nil
 local function get(url, query)
 	check_config_is_set()
+	local headers = {
+		Authorization = API.headers.Authorization,
+	}
+	logger.debug(
+		'GET request: ',
+		url,
+		'query params: ',
+		vim.inspect(query),
+		'headers: ',
+		vim.inspect(headers)
+	)
 	local response = curl.get(url, {
-		headers = {
-			Authorization = API.headers.Authorization,
-		},
+		headers = headers,
 		query = set_up_query_param(query),
 	})
+	logger.debug('GET response: ', vim.inspect(response))
 	return get_base_resposne(response)
 end
 
@@ -88,14 +99,24 @@ end
 local function post(url, body, query, skip_status_codes)
 	check_config_is_set()
 	local encoded_body = vim.json.encode(body)
+	local headers = {
+		Authorization = API.headers.Authorization,
+		content_type = 'application/json',
+	}
+
+	logger.debug(
+		'POST request',
+		'headers',
+		vim.inspect(headers),
+		'body: ',
+		vim.inspect(body)
+	)
 	local response = curl.post(url, {
-		headers = {
-			Authorization = API.headers.Authorization,
-			content_type = 'application/json',
-		},
+		headers = headers,
 		body = encoded_body,
 		query = set_up_query_param(query),
 	})
+	logger.debug('POST response: ', vim.inspect(response))
 	return get_base_resposne(response, skip_status_codes)
 end
 
