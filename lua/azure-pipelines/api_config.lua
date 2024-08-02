@@ -16,7 +16,7 @@ local function get_config_popup()
 	}
 end
 
-local function save_profile(popups)
+local function save_config(popups)
 	local key = ui.get_popup_value(popups.name)
 	local org_name = ui.get_popup_value(popups.org_name)
 	local project_name = ui.get_popup_value(popups.project_name)
@@ -74,7 +74,8 @@ local function open_api_config_editor(popups)
 		end)
 		-- save
 		popup:map('n', 's', function()
-			if save_profile(popups) then
+			if save_config(popups) then
+				api.refresh_config()
 				layout:unmount()
 			end
 		end)

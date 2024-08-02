@@ -43,6 +43,17 @@ select/save/delete the Azure DevOps API configuration.
 lua require('azure-pipelines').select_api_config()
 ```
 
+#### Token
+
+Generate a personal access token with the following permissions:
+- `Build (Read & Execute)`
+- `Code (Read & Write)`
+
+Encode and save the token in base64 format.
+```lua
+echo -n ":$TOKEN" | base64 
+```
+
 The api configuration is saved globally and can be connect to multiple projects.
 The configuration  which is marked as `active` will be used for the current project.
 
