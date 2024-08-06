@@ -174,6 +174,7 @@ function M.show_popup(top_text, botton_text, size, callback)
 			},
 		},
 		position = '50%',
+		relative = 'editor',
 		win_options = {
 			winhighlight = 'Normal:Normal,FloatBorder:Normal',
 		},
