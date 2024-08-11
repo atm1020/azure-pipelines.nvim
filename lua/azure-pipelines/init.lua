@@ -18,4 +18,18 @@ M.show_settings = pipeline.show_settings
 --- setup
 M.setup = startup.setup
 
+--- user commands
+local commands = {
+	['AzurePipelinesValidate'] = pipeline.validate,
+	['AzurePipelinesPreview'] = pipeline.preview,
+	['AzurePipelinesSelectBranch'] = pipeline.select_branch,
+	['AzurePipelinesSelectPipeline'] = pipeline.select_pipeline,
+	['AzurePipelinesSelectMode'] = pipeline.select_mode,
+	['AzurePipelinesShowSettings'] = pipeline.show_settings,
+	['AzurePipelinesSelectApiConfig'] = api_config.select_api_config,
+}
+for name, func in pairs(commands) do
+	vim.api.nvim_create_user_command(name, func, {})
+end
+
 return M

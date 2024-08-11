@@ -73,7 +73,8 @@ end
 --- @param data AzDevopsApiConfig
 function M.save_api_config_value(key, data)
 	local config = M.get_api_config_list()
-	config[key] = data
+	-- merge with existing data
+	config[key] = vim.tbl_extend('force', config[key] or {}, data)
 	return save_config(api_config_path, config)
 end
 
@@ -147,7 +148,7 @@ return M
 ---@class AzDevopsApiConfig
 ---@field org_name string
 ---@field project_name string
----@field api_token string
+---@field api_token string|nil
 
 ---@class AzurePipelinesProjectConfig
 ---@field active_api_config_key string

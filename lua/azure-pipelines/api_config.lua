@@ -5,6 +5,7 @@ local event = require('nui.utils.autocmd').event
 local api = require('azure-pipelines.azure_devops_api')
 local async = require('plenary.async')
 
+local hided_token = string.rep('*', 30)
 local M = {}
 
 local function get_config_popup()
@@ -36,8 +37,10 @@ local function save_config(popups)
 	local profile = {
 		org_name = org_name,
 		project_name = project_name,
-		api_token = api_token,
 	}
+	if api_token ~= hided_token then
+		profile.api_token = api_token
+	end
 
 	local ok = config.save_api_config_value(key, profile)
 	if ok then
@@ -128,6 +131,7 @@ local function select_api_config()
 		ui.set_popup_value(popup.name.bufnr, selected_key)
 		ui.set_popup_value(popup.org_name.bufnr, profile.org_name)
 		ui.set_popup_value(popup.project_name.bufnr, profile.project_name)
+		ui.set_popup_value(popup.api_token.bufnr, hided_token)
 		open_api_config_editor(popup)
 	end
 	local menu = ui.base_list(

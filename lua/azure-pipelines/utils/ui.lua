@@ -59,8 +59,6 @@ function M.get_popup_value(popup)
 	if ok then
 		return value[1]
 	end
-	-- print('Failed to get popup value for ' .. popup.name)
-	-- notify.error('Failed to get popup value for ' .. popup.name)
 end
 
 function M.get_and_fill_popup(title, enter, keymaps)
@@ -88,17 +86,6 @@ function M.get_and_fill_popup(title, enter, keymaps)
 		win_options = win_options,
 	})
 
-	-- fill the popup with the config value
-	-- if target_profile is nil, it's a new profile
-	-- if target_profile then
-	-- 	vim.api.nvim_buf_set_lines(
-	-- 		popup.bufnr,
-	-- 		0,
-	-- 		-1,
-	-- 		false,
-	-- 		{ config.get_api_config(target_profile)[key] or ''}
-	-- 	)
-	-- end
 	return popup
 end
 
