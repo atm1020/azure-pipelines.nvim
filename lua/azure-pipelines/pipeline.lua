@@ -35,12 +35,17 @@ end
 
 --- @param err_msg string
 local function error_msg_popup(err_msg)
+	local err_msg_lines = {}
+	for line in err_msg:gmatch('[^\r\n]+') do
+		table.insert(err_msg_lines, line)
+	end
 	ui.show_popup(
 		'Pipeline Preview Error',
 		'error message',
-		ui.calc_size({ err_msg }),
+		ui.calc_size(err_msg_lines),
 		function(bufnr)
-			vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, { err_msg })
+			logger.error('Error message: ' .. err_msg)
+			vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, err_msg_lines)
 			vim.api.nvim_command('highlight RedText ctermfg=LightRed guifg=#FF6666')
 			vim.api.nvim_buf_add_highlight(bufnr, -1, 'RedText', 0, 0, -1)
 		end
