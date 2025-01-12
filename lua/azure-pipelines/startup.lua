@@ -1,9 +1,18 @@
+local curl = require('plenary.curl')
+local Path = require('plenary.path')
+local logger = require('azure-pipelines.utils.logger')
+
 local M = {}
 
+local service_schema_sha = 'c9e33c280403692f587051dfffa753ac58b9ceac'
+local config_path = vim.fn.stdpath('data')
+	.. '/azure-pipelines-service-schema'
+	.. service_schema_sha
+	.. '.json'
 M.config = {}
 
 local global_config = {
-	schema = 'https://raw.githubusercontent.com/microsoft/azure-pipelines-vscode/main/service-schema.json',
+	schema = config_path,
 	filter = {
 		'azure-pipeline*.y*l',
 		'.azure*',
@@ -15,6 +24,20 @@ local global_config = {
 	log_level = vim.log.levels.INFO,
 }
 
+local function download_service_schema()
+	local url = 'https://raw.githubusercontent.com/microsoft/azure-pipelines-vscode/'
+		.. service_schema_sha
+		.. '/service-schema.json'
+	curl.get(url, {
+		callback = function(response)
+			local file = io.open(config_path, 'w')
+			assert(file, 'Failed to open file')
+			file:write(response.body)
+			file:close()
+			logger.info('Schema downloaded  sha:' .. service_schema_sha)
+		end,
+	})
+end
 --- @param custom_config UserConfig|nil
 function M.setup(custom_config)
 	local packages = {
@@ -44,10 +67,12 @@ function M.setup(custom_config)
 
 	local config =
 		vim.tbl_deep_extend('force', global_config, custom_config or {})
-	vim.g.azure_pipeline = {
-		log_level = config.log_level,
-	}
 	local lspconfig = require('lspconfig')
+	if not Path:new(config.schema):exists() then
+		-- TODO remove old service-schema.json
+		download_service_schema()
+	end
+
 	lspconfig.azure_pipelines_ls.setup({
 		root_dir = lspconfig.util.root_pattern(config.root_pattern),
 		settings = {
@@ -63,5 +88,5 @@ end
 return M
 
 --- @class UserConfig
---- @field schema string
---- @field filter string[]
+--- @field schema string|nil
+--- @field filter string[]|nil
